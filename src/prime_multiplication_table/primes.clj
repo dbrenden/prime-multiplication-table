@@ -1,7 +1,5 @@
 (ns prime-multiplication-table.primes
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.test.alpha :as stest]
-            [clojure.repl :as repl]))
+  (:require [clojure.spec.alpha :as s]))
 
 (s/def ::pos-int
   (s/and int? pos?))
@@ -70,6 +68,5 @@
 (defn first-n-primes
   "Returns vector of first n primes"
   [n]
-  (when (s/valid? ::pos-int n)
-    (reduce (fn [coll _]
-              (conj coll (gen-next-largest-prime coll))) [] (range n))))
+  (reduce (fn [coll _]
+            (conj coll (gen-next-largest-prime coll))) [] (range n)))
