@@ -8,11 +8,11 @@
              :kind vector?))
 
 (s/fdef find-index-of-first-value-greater-than-x
-        :args (s/cat :nums ::vec-of-pos-int
-                     :x int?)
-        :ret int?)
+        :args (s/and (s/cat :nums ::vec-of-pos-int
+                            :x number?)
+                     #(< (:x %) (last (sort (:nums %))))))
 
-(defn find-index-of-first-value-greater-than-x
+(defn- find-index-of-first-value-greater-than-x
   "Given a vector of nums, returns index of first value greater than x"
   [nums x]
   (loop [i 0]
@@ -23,10 +23,9 @@
 
 (s/fdef take-primes-less-than-x
         :args (s/cat :primes ::vec-of-pos-int
-                     :x int?)
-        :ret ::vec-of-pos-int)
+                     :x int?))
 
-(defn take-primes-less-than-x
+(defn- take-primes-less-than-x
   "Given an ordered vector of primes, takes all primes under a certain value"
   [primes x]
   (let [num-primes (find-index-of-first-value-greater-than-x primes x)]
@@ -35,38 +34,32 @@
 (s/fdef x-is-next-largest-prime?
         :args (s/and (s/cat :nums ::vec-of-pos-int
                             :x int?)
-                     #(> (:x %) (last (:nums %))))
-        :ret boolean?)
+                     #(> (:x %) (last (:nums %)))))
 
-(defn x-is-next-largest-prime?
-  "Given an ordered vector of primes and a number,
-  checks if number is next largest prime after the last prime in list"
+(defn- x-is-next-largest-prime?
+  "Given an ordered vector of primes and a number smaller or equal to next
+  largest prime, checks if number is next largest prime after the last prime in vector."
   [primes x]
   (let [sqrt-x (java.lang.Math/sqrt ^Integer x)
         factors (take-primes-less-than-x primes sqrt-x)]
     (not-any? #(= (mod x %) 0) factors)))
 
 (s/fdef generate-next-largest-prime
-        :args (s/cat :primes ::vec-of-pos-int)
-        :ret int?)
+        :args (s/cat :primes ::vec-of-pos-int))
 
-(defn gen-next-largest-prime
+(defn- gen-next-largest-prime
   "Given an ordered vector of primes, generates next largest prime"
   [primes]
-  (if-not (seq primes)
-    2
-    (loop [i (inc (peek primes))]
-      (if (x-is-next-largest-prime? primes i)
-        i
-        (recur (inc i))))))
+  (loop [i (inc (peek primes))]
+    (if (x-is-next-largest-prime? primes i)
+      i
+      (recur (inc i)))))
 
 (s/fdef first-n-primes
-        :args (s/cat :n ::pos-int)
-        :ret ::vec-of-pos-int
-        :fn #(= (count (:ret %)) (-> % :args :n)))
+        :args (s/cat :n ::pos-int))
 
 (defn first-n-primes
   "Returns vector of first n primes"
   [n]
   (reduce (fn [coll _]
-            (conj coll (gen-next-largest-prime coll))) [] (range n)))
+            (conj coll (gen-next-largest-prime coll))) [2] (range 1 n)))
