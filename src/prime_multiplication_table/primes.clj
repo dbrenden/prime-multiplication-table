@@ -9,12 +9,13 @@
   (s/coll-of ::pos-int))
 
 (s/fdef find-index-of-first-value-greater-than-x
-        :args (s/cat :x ::pos-int
-                     :nums ::coll-of-pos-int)
+        :args (s/cat :nums ::coll-of-pos-int
+                     :x ::pos-int)
         :ret int?)
 
 (defn find-index-of-first-value-greater-than-x
-  [x nums]
+  "Given an coll of nums, returns index of first value greater than x"
+  [nums x]
   (loop [i 0]
     (if (> (nth nums i)
            x)
@@ -22,37 +23,40 @@
       (recur (inc i)))))
 
 (s/fdef take-primes-less-than-x
-        :args (s/cat :x int?
-                     ::primes ::coll-of-pos-int)
+        :args (s/cat :primes ::coll-of-pos-int
+                     :x int?)
         :ret ::coll-of-pos-int)
 
 (defn take-primes-less-than-x
-  [x primes]
+  "Given an ordered coll of primes, takes all primes under a certain value"
+  [primes x]
   (let [num-primes (find-index-of-first-value-greater-than-x x primes)]
     (take num-primes primes)))
 
 (s/fdef x-is-next-largest-prime?
-        :args (s/cat :x ::pos-int
-                     :nums ::coll-of-pos-int)
+        :args (s/cat :nums ::coll-of-pos-int
+                     :x ::pos-int)
         :ret boolean?)
 
 (defn x-is-next-largest-prime?
-  [x primes]
+  "Given an ordered coll of primes and a number,
+  checks if number is next largest prime after the last prime in list"
+  [primes x]
   (let [sqrt-x (java.lang.Math/sqrt ^Integer x)
-        primes (take-primes-less-than-x sqrt-x primes)]
-    (not-any? #(= (mod x %) 0) primes)))
+        factors (take-primes-less-than-x sqrt-x primes)]
+    (not-any? #(= (mod x %) 0) factors)))
 
 (s/fdef generate-next-largest-prime
         :args (s/cat :primes ::coll-of-pos-int)
         :ret int?)
 
-(defn generate-next-largest-prime
-  "Given coll of primes, generates next largest prime"
+(defn gen-next-largest-prime
+  "Given an ordered coll of primes, generates next largest prime"
   [primes]
   (if-not (seq primes)
     2
     (loop [i (inc (last primes))]
-      (if (x-is-next-largest-prime? i primes)
+      (if (x-is-next-largest-prime? primes i)
         i
         (recur (inc i))))))
 
@@ -62,8 +66,8 @@
         :fn #(= (count (:ret %)) (-> % :args :n)))
 
 (defn first-n-primes
-  "Returns first n primes"
+  "Returns vector of first n primes"
   [n]
   (when (s/valid? ::pos-int n)
     (reduce (fn [coll _]
-              (conj coll (generate-next-largest-prime coll))) [] (range n))))
+              (conj coll (gen-next-largest-prime coll))) [] (range n))))
