@@ -5,36 +5,36 @@
   (count (str num)))
 
 (defn gen-padding-whitespace
-  [last-num-size cell]
-  (let [padding (- last-num-size (count-digits cell))]
+  [cell-size v]
+  (let [padding (- cell-size (count-digits v))]
     (apply str (repeat padding " "))))
 
-(defn generate-row-str
-  [row last-num-size]
-  (reduce (fn [o cell]
-            (str o (gen-padding-whitespace last-num-size cell) (str cell) "|")) "" row))
+(defn gen-row-str
+  [row cell-size]
+  (reduce (fn [output v]
+            (str output (gen-padding-whitespace cell-size v) (str v) "|")) "" row))
 
-(defn generate-below-row-str
-  [num-columns last-num-size]
-  (reduce (fn [o cell]
-            (str o (apply str (repeat last-num-size "-")) "|")) "" (range num-columns)))
+(defn gen-below-row-str
+  [num-columns cell-size]
+  (reduce (fn [output v]
+            (str output (apply str (repeat cell-size "-")) "|")) "" (range num-columns)))
 
 (defn gen-table-str
   [primes table]
-  (let [last-num-size (count-digits (last (last table)))
+  (let [cell-size (count-digits (last (last table)))
         num-columns (inc (count primes))
         num-rows num-columns]
     (str
-     (generate-row-str (cons nil primes) last-num-size)
+     (gen-row-str (cons nil primes) cell-size)
      "\n"
-     (generate-below-row-str num-columns last-num-size)
+     (gen-below-row-str num-columns cell-size)
      "\n"
      (reduce (fn [o x]
                (let [prime (get primes x)]
                  (str o
-                      (generate-row-str (cons prime (nth table x)) last-num-size)
+                      (gen-row-str (cons prime (nth table x)) cell-size)
                       "\n"
-                      (generate-below-row-str num-columns last-num-size)
+                      (gen-below-row-str num-columns cell-size)
                       "\n"))) "" (range (dec num-rows))))))
 
 
